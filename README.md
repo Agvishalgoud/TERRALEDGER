@@ -1,382 +1,330 @@
-TERRALEDGER — Blockchain-Based Land Registry Protocol
+# TERRALEDGER — Blockchain-Based Land Registry Protocol
+
+### Trust Through Transparency | Verifiable Property Records
+
+TERRALEDGER is a blockchain-based land registry prototype that demonstrates property registration, ownership record verification, authority-based approval, and ownership transfer workflows using Ethereum smart contracts.
+
+The project explores how blockchain technology can improve the transparency, traceability, and integrity of property records by maintaining verifiable on-chain records and transaction history.
+
+> **Disclaimer:** TERRALEDGER is an educational prototype deployed on the Ethereum Sepolia testnet. It is not an official government land registry and does not establish legal ownership of real property.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
+- [System Architecture](#system-architecture)
+- [How It Works](#how-it-works)
+- [Smart Contract Functions](#smart-contract-functions)
+- [Blockchain Deployment](#blockchain-deployment)
+- [Project Structure](#project-structure)
+- [Installation and Setup](#installation-and-setup)
+- [Using the Application](#using-the-application)
+- [Security and Privacy](#security-and-privacy)
+- [Future Enhancements](#future-enhancements)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Overview
+
+Traditional property record systems can face challenges involving record tampering, limited transparency, fragmented documentation, and difficulties verifying ownership history.
+
+TERRALEDGER demonstrates a decentralized approach in which property information and approval decisions are recorded through Ethereum smart contracts.
+
+The application provides interfaces for property registration, property verification, authority management, and blockchain transaction history.
+
+## Key Features
+
+- **Property Registration:** Register a property using a unique property reference ID, location hash, document hash, and area.
+- **On-Chain Verification:** Retrieve property details and check the recorded ownership and approval status.
+- **Authority Management:** Allow the contract administrator to grant or revoke authority permissions for wallet addresses.
+- **Authority Approval:** Enable authorized wallets to approve registered properties.
+- **Duplicate ID Checks:** Check for an existing property ID before submitting a registration transaction.
+- **Ownership Transfer:** Support ownership transfer requests, approval, and cancellation through smart contract functions.
+- **Blockchain History:** Display available contract events, block numbers, timestamps, and transaction links.
+- **MetaMask Integration:** Connect a wallet and sign transactions on the Sepolia test network.
+- **Dashboard:** View property records, verification information, authority permissions, and blockchain activity.
 
+## Technology Stack
 
+| Component | Technology |
+|---|---|
+| Frontend | React.js, Vite, CSS |
+| Smart Contracts | Solidity |
+| Development Framework | Hardhat |
+| Blockchain | Ethereum Sepolia Testnet |
+| Wallet | MetaMask |
+| Blockchain Interaction | ethers.js |
+| Contract Interface | Application Binary Interface (ABI) |
+| Block Explorer | Sepolia Etherscan |
+| Package Management | npm |
+| Version Control | Git and GitHub |
+
+---
+
+## System Architecture
+
+TERRALEDGER follows a frontend-to-smart-contract architecture.
 
-Trust through transparency. Property records made verifiable.
+1. **Frontend:** React provides the user interface for registration, verification, authority approval, and history.
+2. **Wallet:** MetaMask connects users to Ethereum and signs transactions.
+3. **Smart Contract:** The `PropertyRegistry` contract handles property records, authority permissions, approval, and ownership transfer operations.
+4. **Blockchain:** Ethereum Sepolia records contract state changes and transaction data.
+5. **Verification and History:** The application reads contract state and available event logs to display information to users.
 
+```text
+          Property Owner / Authority / Admin
+                         |
+                         v
+                React + Vite Frontend
+                         |
+                         v
+                   MetaMask Wallet
+                         |
+                         v
+              PropertyRegistry.sol
+                  Smart Contract
+                         |
+                         v
+              Ethereum Sepolia Testnet
+                         |
+             +-----------+-----------+
+             |                       |
+             v                       v
+       Property State          Transaction Logs
+             |                       |
+             +-----------+-----------+
+                         |
+                         v
+              Verification Dashboard
+```
 
+## How It Works
 
-TERRALEDGER is a blockchain-based land registry prototype designed to demonstrate transparent property registration, ownership record verification, and authority-based approval using Ethereum smart contracts.
+### 1. Property Registration
 
+1. The property owner connects MetaMask.
+2. The owner enters a property reference ID, location, area, and document reference.
+3. The frontend generates hashes for the location and document reference.
+4. The owner confirms the transaction in MetaMask.
+5. The smart contract records the property on Sepolia.
 
+### 2. Authority Management
 
-The project uses the Sepolia test network to record property information and approval status on-chain. It aims to demonstrate how blockchain can help make property records more traceable, tamper-resistant, and independently verifiable.
+1. The administrator connects the wallet associated with the contract admin.
+2. The administrator enters an authority's wallet address.
+3. The administrator grants permission using `setAuthority(address, true)`.
+4. The authority can subsequently perform operations permitted by the smart contract.
+5. The administrator can revoke access using `setAuthority(address, false)`.
 
+### 3. Property Approval
 
+1. An authority reviews the relevant property documents and official records outside the blockchain.
+2. The authority connects its authorized wallet.
+3. The authority submits an approval transaction using `approveProperty(propertyId)`.
+4. Once confirmed, the contract's approval state can be retrieved through the verification interface.
 
-Disclaimer: TERRALEDGER is an educational prototype deployed on the Sepolia testnet. It is not an official government land registry and does not establish legal ownership of real property.
+### 4. Property Verification
 
+Users enter a property ID to retrieve its record from the deployed contract.
 
+The application can display the recorded owner, property area, document hash, location hash, pending ownership transfer, and authority approval status.
 
-Key Features
+- **Property Verified:** The property exists and the contract reports it as approved.
+- **Pending Authority Approval:** The property is registered but has not yet been approved.
+- **Property Not Found:** No existing property record was returned for the supplied ID.
 
+Blockchain approval records an authority's decision; it does not independently confirm the authenticity of documents or establish legal ownership.
 
+### 5. Ownership Transfer
 
-Blockchain Property Registration: Register properties using a unique property reference ID, location hash, document hash, and area.
+The contract supports requesting, approving, and cancelling ownership transfers. The exact permissions and state transitions depend on the deployed smart contract implementation.
 
+### 6. Blockchain History
 
+The application can read available smart contract events and display transaction links, block numbers, and block timestamps. History depends on the events emitted by the contract and the capabilities of the configured RPC provider.
 
-Property Verification: Retrieve a property record from the deployed smart contract and inspect its recorded ownership and approval status.
+---
 
+## Smart Contract Functions
 
+The deployed `PropertyRegistry` contract includes the following functions:
 
-Authority-Based Approval: Allow the contract admin to grant or revoke authority permissions. Authorized wallets can approve registered properties.
+| Function | Description |
+|---|---|
+| `admin()` | Retrieves the contract administrator |
+| `authorities(address)` | Checks authority permissions for an address |
+| `setAuthority(address, bool)` | Grants or revokes authority access |
+| `registerProperty(...)` | Registers a property record |
+| `approveProperty(string)` | Approves a registered property |
+| `verifyProperty(string)` | Retrieves a property's record and status |
+| `requestOwnershipTransfer(...)` | Requests an ownership transfer |
+| `approveOwnershipTransfer(string)` | Approves a transfer request |
+| `cancelOwnershipTransfer(string)` | Cancels a transfer request |
+| `getPropertyKey(string)` | Retrieves a property key |
 
+Actual authorization rules and validation are enforced by the deployed contract.
 
+---
 
-Duplicate ID Prevention: Check whether a property ID already exists before attempting registration. Contract-level uniqueness enforcement is required for reliable protection.
+## Blockchain Deployment
 
+TERRALEDGER is deployed on the Ethereum Sepolia test network.
 
+| Detail | Value |
+|---|---|
+| Network | Ethereum Sepolia |
+| Chain ID | `11155111` |
+| Contract Name | `PropertyRegistry` |
+| Contract Address | `0xb311fad5ae8395F209d2D7A60F268293Bd8705aE` |
+| Block Explorer | [View Contract on Sepolia Etherscan](https://sepolia.etherscan.io/address/0xb311fad5ae8395F209d2D7A60F268293Bd8705aE) |
 
-Ownership Transfer Workflow: Support ownership transfer requests, approval, and cancellation through smart contract functions.
+Sepolia is a test network. Test ETH is used to pay transaction fees during development and testing.
 
+---
 
+## Project Structure
 
-Blockchain Transaction History: Read available smart contract events and display block information, timestamps, and transaction links.
-
-
-
-MetaMask Integration: Connect a wallet and interact with the smart contract on Sepolia.
-
-
-
-Dashboard: Display property records, verification results, authority permissions, and blockchain activity.
-
-
-
-Technology Stack
-
-
-
-Component
-
-
-
-Technology
-
-
-
-Frontend
-
-
-
-React, Vite, CSS
-
-
-
-Smart Contracts
-
-
-
-Solidity
-
-
-
-Blockchain Development
-
-
-
-Hardhat
-
-
-
-Blockchain Network
-
-
-
-Ethereum Sepolia Testnet
-
-
-
-Wallet Integration
-
-
-
-MetaMask
-
-
-
-Blockchain Interaction
-
-
-
-ethers.js
-
-
-
-Smart Contract Interface
-
-
-
-ABI
-
-
-
-Block Explorer
-
-
-
-Sepolia Etherscan
-
-
-
-System Architecture
-
-
-
-User Interface: The React frontend provides property registration, verification, and authority management interfaces.
-
-
-
-Wallet Connection: MetaMask connects the user to Sepolia and signs blockchain transactions.
-
-
-
-Smart Contract: The PropertyRegistry contract manages property records, authority permissions, approval, and ownership transfer operations.
-
-
-
-Blockchain: Sepolia stores the contract state and transaction records.
-
-
-
-History and Verification: The frontend reads contract state and available event logs to display property information and transaction history.
-
-
-
-Property Registration and Verification Workflow
-
-
-
-A property owner connects MetaMask.
-
-
-
-The owner enters a property ID, location, area, and document reference.
-
-
-
-The application hashes the location and document reference before submitting them to the contract.
-
-
-
-The smart contract registers the property on Sepolia.
-
-
-
-An authorized authority reviews the relevant records outside the blockchain.
-
-
-
-The authority connects its authorized wallet and approves the property.
-
-
-
-Users can retrieve the property record and inspect its approval status.
-
-
-
-Approval statuses:
-
-
-
-Pending approval: The property is registered but has not been approved by an authority.
-
-
-
-Property verified: The property exists and its on-chain approval flag is true.
-
-
-
-Property not found: The contract does not return an existing record for the requested ID.
-
-
-
-On-chain approval records an authority's decision; it does not independently prove that the underlying documents are genuine.
-
-
-
-Smart Contract Functions
-
-
-
-The deployed PropertyRegistry contract provides the following operations:
-
-
-
-Function
-
-
-
-Purpose
-
-
-
-admin()
-
-
-
-Retrieve the contract administrator
-
-
-
-authorities(address)
-
-
-
-Check whether a wallet is authorized
-
-
-
-setAuthority(address, bool)
-
-
-
-Grant or revoke authority permissions
-
-
-
-registerProperty(...)
-
-
-
-Register a property
-
-
-
-approveProperty(string)
-
-
-
-Approve a registered property
-
-
-
-verifyProperty(string)
-
-
-
-Retrieve a property's on-chain details
-
-
-
-requestOwnershipTransfer(...)
-
-
-
-Request an ownership transfer
-
-
-
-approveOwnershipTransfer(string)
-
-
-
-Approve a transfer request
-
-
-
-cancelOwnershipTransfer(string)
-
-
-
-Cancel a transfer request
-
-
-
-getPropertyKey(string)
-
-
-
-Retrieve the property key
-
-
-
-Access permissions and validation are enforced by the deployed smart contract, not merely by the frontend.
-
-
-
-Deployed Contract
-
-
-
-Network: Ethereum Sepolia Testnet
-
-
-
-Chain ID: 11155111
-
-
-
-Contract Address: 0xb311fad5ae8395F209d2D7A60F268293Bd8705aE
-
-
-
-View Contract on Etherscan: https://sepolia.etherscan.io/address/0xb311fad5ae8395F209d2D7A60F268293Bd8705aE
-
-
-
-Sepolia is a test network. Use test ETH for testing transactions.
-
-
-
-Project Structure
-
-
-
+```text
 TERRALEDGER/
+|
+|-- contracts/
+|   |-- contracts/
+|   |   |-- PropertyRegistry.sol
+|   |-- scripts/
+|   |   |-- deploy.js
+|   |-- test/
+|   |   |-- PropertyRegistry.test.js
+|   |-- ignition/
+|   |-- hardhat.config.js
+|   |-- package.json
+|   |-- package-lock.json
+|   |-- README.md
+|
+|-- frontend/
+|   |-- public/
+|   |-- src/
+|   |   |-- abi/
+|   |   |   |-- PropertyRegistry.json
+|   |   |-- assets/
+|   |   |-- App.jsx
+|   |   |-- App.css
+|   |   |-- contract.js
+|   |   |-- history.js
+|   |   |-- index.css
+|   |   |-- main.jsx
+|   |-- index.html
+|   |-- package.json
+|   |-- vite.config.js
+|   |-- README.md
+|
+|-- .gitignore
+|-- README.md
+```
 
-├── contracts/
+*This structure reflects the main files in the project;
 
-│   ├── contracts/
+---
 
-│   │   └── PropertyRegistry.sol
+## Installation and Setup
 
-│   ├── scripts/
+### Prerequisites
 
-│   ├── test/
+Install the following tools:
 
-│   ├── hardhat.config.js
+- [Node.js and npm](https://nodejs.org/)
+- [Git](https://git-scm.com/)
+- [MetaMask](https://metamask.io/)
+- A GitHub account
+- Sepolia test ETH for blockchain transactions
 
-│   └── package.json
+### 1. Clone the Repository
 
-│
+```bash
+git clone https://github.com/Agvishalgoud/TERRALEDGER.git
+cd TERRALEDGER
+```
 
-├── frontend/
+### 2. Install Smart Contract Dependencies
 
-│   ├── src/
+```bash
+cd contracts
+npm install
+```
 
-│   │   ├── abi/
+### 3. Compile the Smart Contract
 
-│   │   │   └── PropertyRegistry.json
+```bash
+npx hardhat compile
+```
 
-│   │   ├── App.jsx
+### 4. Run Smart Contract Tests
 
-│   │   ├── contract.js
+```bash
+npx hardhat test
+```
 
-│   │   ├── history.js
+### 5. Install Frontend Dependencies
 
-│   │   ├── index.css
+From the project root, run:
 
-│   │   └── main.jsx
+```bash
+cd frontend
+npm install
+```
 
-│   ├── index.html
+### 6. Start the Frontend
 
-│   └── package.json
+```bash
+npm run dev
+```
 
-│
+Open the local URL printed in the terminal by Vite, usually `http://localhost:5173`.
 
-├── .gitignore
+The frontend is configured to interact with the deployed Sepolia contract. You do not need to redeploy it unless you modify the contract or intentionally deploy a new version.
 
-└── README.md
+---
 
+## Using the Application
+
+1. Start the frontend.
+2. Connect MetaMask to the Sepolia network.
+3. Register a test property using the registration page.
+4. Connect the administrator wallet to grant authority permissions.
+5. Connect an authorized wallet to approve the property.
+6. Use the verification page to retrieve the property's on-chain status.
+7. Review available blockchain events and transaction links in Blockchain History.
+
+Use test property information and test wallets during development.
+
+---
+
+## Security and Privacy
+
+- Never commit private keys, seed phrases, wallet recovery phrases, or RPC API secrets.
+- Keep environment files such as `.env` out of version control.
+- Never store confidential property documents directly on a public blockchain.
+- A hash can support integrity checking when compared with a trusted original, but it does not prove that a document is authentic.
+- Frontend duplicate checks alone do not guarantee unique property registration. Uniqueness should also be enforced in the smart contract.
+- Grant authority permissions only to trusted wallets.
+- Review smart contract access controls and test the contract before considering any production use.
+- Sepolia testnet records are not legally authoritative land records.
+
+---
+
+## Future Enhancements
+
+- Integration with authorized government land-record systems.
+- Secure document storage and document integrity verification.
+- Stronger duplicate parcel detection using verified parcel identifiers.
+- Improved authority dashboards and approval workflows.
+- Enhanced event indexing for efficient property history and statistics.
+- Automated testing, access-control reviews, and smart contract security audits.
+- Production deployment following legal, regulatory, and security reviews.
+
+
+**TERRALEDGER — Exploring a more transparent and verifiable approach to property records using blockchain technology.**
